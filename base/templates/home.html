@@ -1,0 +1,112 @@
+{% extends 'layout/main.html'%}
+
+{% block content%}
+{% include 'includes/header.html'%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login and Product Form</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        .form-container {
+            text-align: center;
+            padding: 40px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            max-width: 80%;
+            box-sizing: border-box;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            margin: 15px 0;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 15px 30px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    {% if update %}
+    <h2>Select an element:</h2>
+    <form id="selectForm">
+        <select id="yourListSelect" name="yourListSelect">
+            {% for item in products %}
+                <option value="{{ item }}">{{ item }}</option>
+            {% endfor %}
+        </select>
+        <input type="button" value="Submit" onclick="submitSelection()">
+    </form>
+    </div>
+    {% endif %}
+    <div class="form-container">
+        <h1>Enter Product Name</h1>
+        <form method="post">
+            {% csrf_token %}
+            <input type="text" name="product_name" placeholder="Product Name" required>
+            <br>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</div>   
+
+
+
+<script>
+    function submitSelection() {
+        var selectedValue = encodeURIComponent(document.getElementById("yourListSelect").value);
+        // You can use AJAX to send the selectedValue to your backend view
+        // For simplicity, let's assume the backend URL is /select_item/
+        window.location.href = "/select_item/" + selectedValue + "/";
+    }
+</script>
+   <script>
+   // Retrieve the is_authenticated status from Django's template context
+   let isUserAuthenticated = {{ request.user.is_authenticated|yesno:"true,false" }};
+   // Function to check if the user is logged in
+   function checkLoginStatus() {
+       if (!isUserAuthenticated) {
+         alert("Please log in to submit.");
+      }
+   }
+   document.querySelector(".form-container button").addEventListener("click", checkLoginStatus);
+   </script>
+   
+   </body>
+   </html>
+   
+{% endblock content%}
