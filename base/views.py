@@ -7,12 +7,17 @@ from django.contrib import messages
 from django.contrib.auth import authenticate,login
 from django.core.mail import send_mail
 from django.contrib.auth import logout as auth_logout  
+from django.shortcuts import render, redirect
+from .forms import ProductSelectionForm
+from . import process
+import re
 from . import process
 def home(request):
     flipkart=[]
     update=False
     if request.method=='POST' and request.user.is_authenticated:
         product_name=request.POST.get('product_name')
+        request.session['product_name'] =product_name
         flipkart=search(request,product_name)
       #  print(flipkart)
         update=True
@@ -81,43 +86,24 @@ def logout_view(request):
         auth_logout(request)
         messages.success(request, "Logged out successfully")
     return redirect("home")
-from django.shortcuts import render
+
+
 def qr(request):
     if request.method == 'POST':
         qr_data = request.POST.get('qr_data')
-        print(qr_data)
-        return redirect('home')
+        request.session['product_name'] =qr_data
+        flipkart=search(request,qr_data)
+        x, y = process.comparison_product_flipkart_amazon(request.session['product_name'])
+        x=x.split('*')
+        y=y.split('*')
+        return render(request,'result.html',{'flipkart':x,'amazon':y})
     return render(request, 'qr.html')
-from django.shortcuts import render, redirect
-from .forms import ProductSelectionForm
-from . import process
-
 def search(request, product_name):
     process.main_allocate(product_name)
     flipkart = process.comparison_product_flipkart(product_name)
-    return flipkart
-
-    # if request.method == 'POST':
-    #     print(request.POST)
-    #     return redirect('home')
-    #     # selected_product_index = int(request.POST.get('product_list'))
-    #     # selected_product = flipkart[selected_product_index]
-
-    #     # # Save the selected product to the database or perform other actions as needed
-    #     # # For example, you can create a Django model to store selected products
-    #     # # Replace this part with your actual model and save logic
-    #     # # Example: ProductModel.objects.create(name=selected_product)
-
-    #     # # Pass the selected product back to the home view using a session or URL parameter
-    #     # request.session['selected_product'] = selected_product
-
-    #     return redirect('home')
-
-   # form = ProductSelectionForm(choices=enumerate(flipkart))
-    
+    return flipkart    
 def select_item(request, selected_value):
-    process.comparison_product_flipkart_amazon('realme 8')
-    # Do something with the selected value, e.g., save it to the session
-   # print(selected_value)
-   # request.session['selected_value'] = selected_value
-    return redirect('home')
+    x, y = process.comparison_product_flipkart_amazon(request.session['product_name'])
+    x=x.split('*')
+    y=y.split('*')
+    return render(request,'result.html',{'flipkart':x,'amazon':y})

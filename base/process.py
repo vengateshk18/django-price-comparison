@@ -146,10 +146,11 @@ def gemini_use(list,product):
     model = genai.GenerativeModel('gemini-pro')
     req="i have created the comparison between multiple ecomerce platforms when user enters the particular product in my website i will scrap in that product in multiple e-commmerce platfoms but the product are very syntactically similar but sementically not similar"
     gen=str(list)
-    ques=",  in this given data find only '{}' and you dont want to look up into multiple things and all if the product have a basic info then you can take that into your account and you can take all the matching thing print like strictly ['product1','product2','product3','product4]".format(product)
-    explanation=",for examplewhen the given product is 'Apple iPhone 15 (Yellow, 128 GB) you dont want to look into colour and all , all that need to do is is if it is a i phone 15 you want to take it and for more info you dont want to take i phone 15 pro and , just take all the products rlated to i phone 15 "
+    ques=",  in this given data find only '{}' and if the two products matches with theier names then you can take that into your account and you can take all the matching thing print like strictly ['product1='price1'*'product2=price2'*'product3=price3'*'product4=price4]".format(product)
+    explanation="always follow the the above pattern of output please, then only i can split them and use for result and if u select the particular data take complete title for that ok and give it in above structure output and please dont look into multiple datas if the basic name of product in list matches and if you notice that they are same products take it"
     response = model.generate_content(req+gen+ques+explanation)
-    print(response.text)
+    #print(response.text)
+    return response.text
 def comparison_product_flipkart_amazon(product_name):
     print(product_name)
     product_name=str(product_name)
@@ -161,11 +162,15 @@ def comparison_product_flipkart_amazon(product_name):
     file_read_amazon=pd.read_excel(excel_file_path_amazon)
     flipkart=find_close_match(product_name,read_file,0.05)
     amazon=find_close_match(product_name,file_read_amazon,0.05)
+    # print(flipkart)
+    # print(amazon)
+    # print("_____________________________________________________________________________________")
     #print(flipkart)
     flipkart=gemini_use(flipkart,product_name)
     amazon=gemini_use(amazon,product_name)
-    print("this is flipkart",flipkart)
-    print("this is amazon",amazon)
+    #print("this is flipkart",flipkart)
+   #print("this is amazon",amazon)
+    return flipkart,amazon
    # print(flipkart)
 
     

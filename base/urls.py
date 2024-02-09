@@ -11,4 +11,5 @@ urlpatterns = [
     path('receive_qr_data/', views.qr, name='receive_qr_data'),
     path('product_select',views.search,name="product_select"),
     path('select_item/<path:selected_value>/', views.select_item, name='your_item_selection'),
+    #path('result',views.select_item,name="resultpage"),
 ]
