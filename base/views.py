@@ -12,6 +12,7 @@ from .forms import ProductSelectionForm
 from . import process
 import re
 from . import process
+from .models import History
 def home(request):
     flipkart=[]
     update=False
@@ -40,7 +41,7 @@ from .forms import UserProfileForm  # Import your user registration form
 def signup(request):
     if request.method == 'POST':
         form = UserProfileForm(request.POST)
-        print(form.is_valid())
+        #print(form.is_valid())
         if form.is_valid():
             user = form.save()
             login(request,user)
@@ -63,7 +64,7 @@ def signup(request):
 
 
 def login_view(request):
-    print(request.POST)
+    #print(request.POST)
     if request.user.is_authenticated:
         return redirect('home')
     
@@ -94,6 +95,7 @@ def qr(request):
         request.session['product_name'] =qr_data
         flipkart=search(request,qr_data)
         x, y = process.comparison_product_flipkart_amazon(request.session['product_name'])
+        History.objects.create(user=request.user,product=request.session['product_name'],flipkart=x,amazon=y)
         x=x.split('*')
         y=y.split('*')
         return render(request,'result.html',{'flipkart':x,'amazon':y})
@@ -101,9 +103,30 @@ def qr(request):
 def search(request, product_name):
     process.main_allocate(product_name)
     flipkart = process.comparison_product_flipkart(product_name)
-    return flipkart    
+    return flipkart
 def select_item(request, selected_value):
     x, y = process.comparison_product_flipkart_amazon(request.session['product_name'])
+    History.objects.create(user=request.user,product=request.session['product_name'],flipkart=x,amazon=y)
+    #print(y)
+    # print(x)
+    # print("__________________________________________")
+    # print(y)
     x=x.split('*')
     y=y.split('*')
+
     return render(request,'result.html',{'flipkart':x,'amazon':y})
+def history(request):
+    history=History.objects.filter(user=request.user)
+   # print(history)
+    return render(request,'history.html',{'search_history':history})
+def visit_history(request,id):
+    history=History.objects.get(id=id)
+    flipkart=history.flipkart
+    flipkart=flipkart.split('*')
+    amazon=history.amazon
+    amazon=amazon.split('*')
+    return render(request,'result.html',{'flipkart':flipkart,'amazon':amazon})
+def delete_history(request,id):
+    history=History.objects.get(id=id)
+    history.delete()
+    return redirect('history')

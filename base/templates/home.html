@@ -1,7 +1,6 @@
 {% extends 'layout/main.html'%}
 
 {% block content%}
-{% include 'includes/header.html'%}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -59,7 +58,7 @@
     </style>
 </head>
 <body>
-
+{% include 'includes/header.html'%}
 <div class="container">
     {% if update %}
     <h2>Select an element:</h2>

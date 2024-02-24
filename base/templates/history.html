@@ -1,0 +1,77 @@
+{% extends 'layout/main.html'%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Search History</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f7f7f7;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background-color: #fff;
+            margin: 5px;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        li span {
+            color: #777;
+        }
+    </style>
+    
+</head>
+<body>
+    
+    {% block content %}
+    {% include 'includes/header.html' %}
+        <div class="container mt-5">
+           <center><h1><b>User Search History</b></h1></center>
+            {% if search_history %}
+                <table class="table mt-3 table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Product</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Visit</th>
+                            <th scope="col">Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for search_entry in search_history %}
+                            <tr>
+                                <td>{{ search_entry.product }}</td>
+                                <td>{{ search_entry.date }}</td>
+                                <td><a href="{% url 'visit-history' search_entry.id %}"><button class="btn btn-primary">Visit</button></a></td>
+                                <td><a href="{% url 'delete-history' search_entry.id %}"><button class="btn btn-danger">Delete</button></a></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="mt-3">No search history available.</p>
+            {% endif %}
+        </div>
+    {% endblock content %}
+    
+</body>
+</html>

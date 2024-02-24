@@ -21,18 +21,28 @@ def scrap_amazon(product):
         'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
     }
     
+    import requests
+    from bs4 import BeautifulSoup
+    import pandas as pd
+    import os
+
+    payload = { 'api_key': '002821697a9eae5f05eeb8978ac70d9b', 'url': url } 
+    r = requests.get('https://api.scraperapi.com/', params=payload)
+    
     response = requests.get(url, headers=headers)
-    soup = BeautifulSoup(response.text, 'html.parser')
+    soup = BeautifulSoup(r.text, 'html.parser')
     
     product_info_elements = soup.find_all("span", class_="a-size-medium a-color-base a-text-normal")
-    product_price_elements = soup.find_all("span", class_="a-price-whole")
+    product_info_elements += soup.find_all("span", class_="a-size-base-plus a-color-base a-text-normal")
+    product_price_elements = soup.find_all("span", class_="a-price-whole") 
     
     product_name_details = []
     product_price_details = []
-    
+
     for product_info_element in product_info_elements:
         product_name = product_info_element.text
         product_name_details.append(product_name)
+        #print(product_info_element)  # Move the print statement inside the loop
     
     for product_price_element in product_price_elements:
         product_price = product_price_element.text
@@ -50,6 +60,7 @@ def scrap_amazon(product):
     df.to_excel(excel_file_path, index=False)
     
     print("Amazon data scrapped")
+
 def scrap_flipkart(product):
     agent=UserAgent()
     url = "https://www.flipkart.com/search?q="+product
@@ -69,6 +80,10 @@ def scrap_flipkart(product):
     response = requests.get(url,headers=headers)
     soup = BeautifulSoup(response.text, 'html.parser')
     product_info_elements = soup.find_all("div", class_="_4rR01T")
+    product_info_elements+= soup.find_all("a", class_="s1Q9rs")
+    product_info_elements+= soup.find_all("a", class_="IRpwTa")
+    product_info_elements+= soup.find_all("a", class_="IRpwTa _2-ICcC")
+
     product_price_elements = soup.find_all("div", class_="_30jeq3")
     product_name_details = []
     product_price_details = []
@@ -92,7 +107,9 @@ def scrap_flipkart(product):
 
 def comparison_product_amazon(product_name):
     product_name=product_name.upper()
-    read_file=pd.read_excel('amazon_data.xlsx')
+    parent_directory=os.getcwd()
+    excel_file_path_amazon = os.path.join(parent_directory, 'amazon_data.xlsx')
+    read_file=pd.read_excel(excel_file_path_amazon)
     amazon=find_close_match(product_name,read_file,0.10)
     for i in range(0,len(amazon)):
        print("%d for %s" %(i+1,amazon[i][0]))
@@ -146,8 +163,9 @@ def gemini_use(list,product):
     model = genai.GenerativeModel('gemini-pro')
     req="i have created the comparison between multiple ecomerce platforms when user enters the particular product in my website i will scrap in that product in multiple e-commmerce platfoms but the product are very syntactically similar but sementically not similar"
     gen=str(list)
-    ques=",  in this given data find only '{}' and if the two products matches with theier names then you can take that into your account and you can take all the matching thing print like strictly ['product1='price1'*'product2=price2'*'product3=price3'*'product4=price4]".format(product)
-    explanation="always follow the the above pattern of output please, then only i can split them and use for result and if u select the particular data take complete title for that ok and give it in above structure output and please dont look into multiple datas if the basic name of product in list matches and if you notice that they are same products take it"
+    
+    ques=",  in this given data find only '{}' and if the two products matches with theier names then you can take that into your account and you can take all the matching thing print like strictly ['product1='price1'*'product2=price2'*'product3=price3'*'product4=price4] atmost ten best data".format(product)
+    explanation="always follow the the above pattern of output please, then only i can split them and use for result and if u select the particular data take complete title for that ok and give it in above structure output and please dont look into multiple datas if the basic name of product in list matches and give the complete title of the product if you are choosing the complete title and price and if you notice that they are same products take it and fllow the structure of output as['product1='price1'*'product2=price2'*'product3=price3'*'product4=price4]"
     response = model.generate_content(req+gen+ques+explanation)
     #print(response.text)
     return response.text
